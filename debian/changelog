@@ -1,0 +1,5 @@
+samdump2 (1.1.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #392905).
+
+ -- Adam Cécile (Le_Vert) <gandalf@le-vert.net>  Sat, 14 Oct 2006 07:10:23 +0200

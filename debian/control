@@ -1,0 +1,20 @@
+Source: samdump2
+Section: admin
+Priority: optional
+Maintainer: Adam Cécile (Le_Vert) <gandalf@le-vert.net>
+Build-Depends: debhelper (>= 5), libssl-dev
+Standards-Version: 3.7.2
+
+Package: samdump2
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: bkhive
+Suggests: ophcrack
+Description: Dump Windows 2k/NT/XP password hashes
+ This tool is designed to dump Windows 2k/NT/XP password hashes from a SAM
+ file. It requires the syskey key which can be found with tools like bkhive.
+ .
+ Syskey is a Windows feature that adds an additional encryption layer to the
+ password hashes stored in the SAM database.
+ .
+  Homepage: http://ophcrack.sourceforge.net/
