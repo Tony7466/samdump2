@@ -148,12 +148,13 @@ int main( int argc, char **argv ) {
   char *username;
   int rid;
   int usernameoffset, usernamelen;
-  int hashesoffset;
+  int lm_hashesoffset, nt_hashesoffset;
+  int lm_size, nt_size;
   
   unsigned char obfkey[0x10];
   unsigned char fb[0x10];
   
-  fprintf(stderr, "samdump2 1.1.0 by Objectif Securite\nhttp://www.objectif-securite.ch\noriginal author: ncuomo@studenti.unina.it\n\n" );
+  fprintf(stderr, "samdump2 1.1.1 by Objectif Securite\nhttp://www.objectif-securite.ch\noriginal author: ncuomo@studenti.unina.it\n\n" );
   
   if( argc != 3 ) {
     printf( "Usage:\nsamdump2 samhive keyfile\n" );
@@ -286,28 +287,32 @@ int main( int argc, char **argv ) {
     
     username[ usernamelen ] = 0;
 #if BYTE_ORDER == LITTLE_ENDIAN
-    hashesoffset = *(int *)(b + 0x9c ) + 0xcc;
+    lm_hashesoffset = *(int *)(b + 0x9c ) + 0xcc;
+    lm_size = *(int *)(b + 0xa0 );
+    nt_hashesoffset = *(int *)(b + 0xa8 ) + 0xcc;
+    nt_size = *(int *)(b + 0xac );
 #elif BYTE_ORDER == BIG_ENDIAN
-    hashesoffset = __bswap_32(*(int *)(b + 0x9c )) + 0xcc;
+    lm_hashesoffset = __bswap_32(*(int *)(b + 0x9c )) + 0xcc;
+    lm_size = __bswap_32(*(int *)(b + 0xa0 ));
+    nt_hashesoffset = __bswap_32(*(int *)(b + 0xa8 )) + 0xcc;
+    nt_size = __bswap_32(*(int *)(b + 0xac ));
 #endif
 #ifdef DEBUG 
-    printf("hashoffset = %x, blen = %x\n", hashesoffset, blen);
+    printf("lm_hashoffset = %x, lm_size = %x\n", lm_hashesoffset, lm_size);
+    printf("nt_hashoffset = %x, nt_size = %x\n", nt_hashesoffset, nt_size);
 #endif
-    
-    if( hashesoffset + 0x28 < blen ) {
-#ifdef DEBUG
-      printf("\n");
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", b[hashesoffset+4+i] );
-      
-      printf("\n");
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", b[hashesoffset+8+0x10+i] );
-      printf("\n");
-#endif
+
       /* Print the user hash */
       printf( "%s:%d:", username, rid );
       
+    
+    if( lm_size == 0x14 ) {
+#ifdef DEBUG
+      printf("\n");
+      for( i = 0; i < 0x10; i++ )
+	printf( "%.2x", b[lm_hashesoffset+4+i] );
+#endif
+
       /* LANMAN */
       /* hash the hbootkey and decode lanman password hashes */
       MD5_Init( &md5c );
@@ -323,7 +328,7 @@ int main( int argc, char **argv ) {
       MD5_Final( md5hash, &md5c );        
       
       RC4_set_key( &rc4k, 0x10, md5hash );
-      RC4( &rc4k, 0x10, &b[ hashesoffset + 4 ], obfkey );
+      RC4( &rc4k, 0x10, &b[ lm_hashesoffset + 4 ], obfkey );
 #ifdef DEBUG
       printf("\nobfkey: ");
       for( i = 0; i < 0x10; i++ )
@@ -351,51 +356,18 @@ int main( int argc, char **argv ) {
       
       for( i = 0; i < 0x10; i++ )
 	printf( "%.2x", fb[i] );
-      
-      printf( ":" );
-      
-      /* NT */
-      /* hash the hbootkey and decode the nt password hashes */
-      MD5_Init( &md5c );
-      MD5_Update( &md5c, hbootkey, 0x10 );
-#if BYTE_ORDER == LITTLE_ENDIAN
-      MD5_Update( &md5c, &rid, 0x4 );
-#elif BYTE_ORDER == BIG_ENDIAN
-      rid = __bswap_32(rid);
-      MD5_Update( &md5c, &rid, 0x4 );
-      rid = __bswap_32(rid);
-#endif
-      MD5_Update( &md5c, antpassword, 0xb );
-      MD5_Final( md5hash, &md5c );        
-      
-      RC4_set_key( &rc4k, 0x10, md5hash );
-      RC4( &rc4k, 0x10, &b[ hashesoffset + 0x10 + 8], obfkey );
-      
-      /* Decrypt the NT md4 password hash as two 8 byte blocks. */
-      des_ecb_encrypt((des_cblock *)obfkey,
-		      (des_cblock *)fb, ks1, DES_DECRYPT);
-      des_ecb_encrypt((des_cblock *)(obfkey + 8),
-		      (des_cblock *)&fb[8], ks2, DES_DECRYPT);
-      
-      /* sf27 wrap to sf25 */
-      //sf27( obfkey, (int*)&rid, fb );
-      
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", fb[i] );
-      
-      printf( ":::\n" );
+    } else {
+      printf( "aad3b435b51404eeaad3b435b51404ee" );
     }
-    else if( hashesoffset + 0x14 < blen ) {
+    printf( ":" );
+    
+    if( nt_size == 0x14 ) {
 #ifdef DEBUG
       printf("\n");
       for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", b[hashesoffset+8+i] );
+	printf( "%.2x", b[nt_hashesoffset+4+i] );
       printf("\n");
 #endif
-      /* Print the user hash */
-      printf( "%s:%d:", username, rid );
-      
-      printf( "aad3b435b51404eeaad3b435b51404ee:" );
       
       /* NT */
       /* hash the hbootkey and decode the nt password hashes */
@@ -412,14 +384,16 @@ int main( int argc, char **argv ) {
       MD5_Final( md5hash, &md5c );        
       
       RC4_set_key( &rc4k, 0x10, md5hash );
-      RC4( &rc4k, 0x10, &b[ hashesoffset + 8], obfkey );
-      
-      /* Get the two decrpt keys. */
-      sid_to_key1(rid,(unsigned char *)deskey1);
-      des_set_key((des_cblock *)deskey1,ks1);
-      sid_to_key2(rid,(unsigned char *)deskey2);
-      des_set_key((des_cblock *)deskey2,ks2);
-      
+      RC4( &rc4k, 0x10, &b[ nt_hashesoffset + 4], obfkey );
+
+      if (lm_size != 0x14) {
+	/* Get the two decrpt keys. */
+	sid_to_key1(rid,(unsigned char *)deskey1);
+	des_set_key((des_cblock *)deskey1,ks1);
+	sid_to_key2(rid,(unsigned char *)deskey2);
+	des_set_key((des_cblock *)deskey2,ks2);
+      }
+
       /* Decrypt the NT md4 password hash as two 8 byte blocks. */
       des_ecb_encrypt((des_cblock *)obfkey,
 		      (des_cblock *)fb, ks1, DES_DECRYPT);
@@ -432,18 +406,10 @@ int main( int argc, char **argv ) {
       for( i = 0; i < 0x10; i++ )
 	printf( "%.2x", fb[i] );
       
-      printf( ":::\n" );
-    }
-    
-    else {
-      /* Print the user hash */
-      fprintf(stderr, "No password for %s\n", username);
-      printf("%s:%d:", username, rid );
-      
-      printf("aad3b435b51404eeaad3b435b51404ee:");
+    } else {
       printf("31d6cfe0d16ae931b73c59d7e0c089c0");
-      printf(":::\n");
     }
+    printf( ":::\n" );
     
     free( username );
     free( keyname );

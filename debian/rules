@@ -11,7 +11,6 @@ else
 endif
 
 build: build-stamp
-
 build-stamp:
 	dh_testdir
 	$(MAKE) CFLAGS="$(CFLAGS)"
@@ -32,12 +31,13 @@ install: build
 	$(MAKE) install PREFIX=/usr DESTDIR=$(CURDIR)/debian/samdump2
 
 binary-indep: build install
-
 binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs ChangeLog
 	dh_installdocs
+	rm -rf $(CURDIR)/debian/samdump2/usr/share/man
+	dh_installman
 	dh_link
 	dh_strip
 	dh_compress

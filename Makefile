@@ -22,7 +22,7 @@ BINDIR   = $(PREFIX)/bin
 MANDIR   = $(PREFIX)/share/man/man1
 INSTALL  = $(shell which install)
 CC	 = $(shell which gcc)
-CFLAGS   =
+CFLAGS   = 
 LIBS     = -lssl
 
 # Default target

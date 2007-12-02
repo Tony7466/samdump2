@@ -283,9 +283,9 @@ int _RegQueryValue( struct hive *h, char *name, nk_hdr *nr, unsigned char **buff
       else
       	memcpy (*buff, read_data( h, v->data_off + 0x1000),(*len));
 #ifdef DEBUG
-      printf("buff = ");
+      printf("buff = ", (*len));
       for (j=0; j<(*len); j++)
-	printf("%x", (*buff)[j]);
+	printf("%.2x", (*buff)[j]);
       printf("\n");
 #endif
 

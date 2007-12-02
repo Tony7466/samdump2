@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Adam Cécile (Le_Vert) <gandalf@le-vert.net>
 Build-Depends: debhelper (>= 5), libssl-dev
 Standards-Version: 3.7.2
+Homepage: http://ophcrack.sourceforge.net/
 
 Package: samdump2
 Architecture: any
@@ -16,5 +17,3 @@ Description: Dump Windows 2k/NT/XP password hashes
  .
  Syskey is a Windows feature that adds an additional encryption layer to the
  password hashes stored in the SAM database.
- .
-  Homepage: http://ophcrack.sourceforge.net/

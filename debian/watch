@@ -1,2 +1,2 @@
 version=3
-http://qa.debian.org/watch/sf.php?project=ophcrack samdump2-(.*)\.tar\.gz
+http://sf.net/ophcrack/samdump2-(.+)\.tar\.gz

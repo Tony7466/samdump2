@@ -1,3 +1,12 @@
+samdump2 (1.1.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Fix debian/watch (Closes: #453564).
+  * Fix wathis manpage entry (bad SH NAME section).
+  * Move homepage to new dpkg field.
+
+ -- Adam Cécile (Le_Vert) <gandalf@le-vert.net>  Sun, 02 Dec 2007 14:54:59 +0100
+
 samdump2 (1.1.0-1) unstable; urgency=low
 
   * Initial release (Closes: #392905).
