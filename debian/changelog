@@ -1,3 +1,11 @@
+samdump2 (1.1.1-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Link with -lcrypto instead of -lssl. (Closes: #556335)
+  * debian/rules: Use dh_prep instead of dh_clean -k.
+
+ -- Ansgar Burchardt <ansgar@debian.org>  Sat, 04 Jun 2011 09:56:51 +0200
+
 samdump2 (1.1.1-1) unstable; urgency=low
 
   * New upstream release.

@@ -23,7 +23,7 @@ MANDIR   = $(PREFIX)/share/man/man1
 INSTALL  = $(shell which install)
 CC	 = $(shell which gcc)
 CFLAGS   = 
-LIBS     = -lssl
+LIBS     = -lcrypto
 
 # Default target
 all: build
