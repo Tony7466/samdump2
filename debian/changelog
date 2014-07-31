@@ -1,3 +1,23 @@
+samdump2 (3.0.0-1) unstable; urgency=medium
+
+  * QA upload.
+  * New upstream release.
+    - bkhive was merged into samdump2 upstream.  Closes: #673945
+  * Add a transitional package for bkhive.
+  * Merge packages descriptions.
+  * Fix debian/watch.
+  * Update debian/rules to dh sequencer.
+  * Use debhelper 9.
+  * Update Standards-Version to 3.9.5
+  * Update to source format 3.0 (quilt).
+  * Update debian/copyright to format 1.0.
+  * d/patches/manpage_formatting.patch: Make the manpage easier to read,
+    point to the 'GPL-2' rather than 'GPL' on Debian systems,
+    bad wathis manpage entry.
+  * Add install_infos.patch: fixes install target.
+
+ -- Unit 193 <unit193@ubuntu.com>  Thu, 31 Jul 2014 00:44:51 -0400
+
 samdump2 (1.1.1-1.1) unstable; urgency=low
 
   * Non-maintainer upload.

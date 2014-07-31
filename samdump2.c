@@ -30,7 +30,13 @@
 #include <openssl/rc4.h>
 #include <openssl/md5.h>
 #include <openssl/des.h>
+#if defined(__linux__)
+#include <endian.h>
+#elif defined(__FreeBSD__)
+#include <machine/endian.h>
+#endif
 #include "hive.h"
+#include "list.h"
 
 #ifdef BYTE_ORDER
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -107,18 +113,82 @@ void sid_to_key2(unsigned long sid,unsigned char deskey[8])
 	str_to_key(s,deskey);
 }
 
+
+/*
+ * Convert UTF-16 to UTF-8
+ */
+
+unsigned char* utf16_to_utf8 (unsigned char *dest, unsigned short int *src, size_t size) {
+  unsigned int code_high = 0;
+
+  while (size--)
+    {
+      unsigned int code = *src++;
+
+      if (code_high)
+	{
+	  if (code >= 0xDC00 && code <= 0xDFFF)
+	    {
+	      /* Surrogate pair.  */
+	      code = ((code_high - 0xD800) << 12) + (code - 0xDC00) + 0x10000;
+	      
+	      *dest++ = (code >> 18) | 0xF0;
+	      *dest++ = ((code >> 12) & 0x3F) | 0x80;
+	      *dest++ = ((code >> 6) & 0x3F) | 0x80;
+	      *dest++ = (code & 0x3F) | 0x80;
+	    }
+	  else
+	    {
+	      /* Error...  */
+	      *dest++ = '?';
+	    }
+
+	  code_high = 0;
+	}
+      else
+	{
+	  if (code <= 0x007F)
+	    *dest++ = code;
+	  else if (code <= 0x07FF)
+	    {
+	      *dest++ = (code >> 6) | 0xC0;
+	      *dest++ = (code & 0x3F) | 0x80;
+	    }
+	  else if (code >= 0xD800 && code <= 0xDBFF)
+	    {
+	      code_high = code;
+	      continue;
+	    }
+	  else if (code >= 0xDC00 && code <= 0xDFFF)
+	    {
+	      /* Error... */
+	      *dest++ = '?';
+	    }
+	  else
+	    {
+	      *dest++ = (code >> 12) | 0xE0;
+	      *dest++ = ((code >> 6) & 0x3F) | 0x80;
+	      *dest++ = (code & 0x3F) | 0x80;
+	    }
+	}
+    }
+
+  return dest;
+}
+
+
 //---
 
-int main( int argc, char **argv ) {
-  FILE *f;
-  unsigned char bootkey[] = { 0x15, 0xbd, 0x18, 0x82, 0xfa, 0x6e, 0xf7, 0xe3, 0x87, 0x90, 0x67, 0x62, 0xd3, 0xfd, 0x5b, 0x03 };
-  
+  int samdump2(unsigned char *sam, list_t *list, unsigned char *bootkey, char *error, int debug, int live, unsigned int size) {
+
   /* const */
   char *regaccountkey, *reguserskey;
   unsigned char aqwerty[] = "!@#$%^&*()qwertyUIOPAzxcvbnmQQQQQQQQQQQQ)(*@&%";
   unsigned char anum[] = "0123456789012345678901234567890123456789";
   unsigned char antpassword[] = "NTPASSWORD";
   unsigned char almpassword[] = "LMPASSWORD";
+
+  char *buff; int buff_len;
 
   char *root_key;
 
@@ -143,51 +213,43 @@ int main( int argc, char **argv ) {
   des_key_schedule ks1, ks2;
   des_cblock deskey1, deskey2;
   
-  int i, j, z;
+  int i, j;
   
-  char *username;
+  char *username_utf8;
   int rid;
+  unsigned short int disabled = 0;
   int usernameoffset, usernamelen;
   int lm_hashesoffset, nt_hashesoffset;
   int lm_size, nt_size;
   
   unsigned char obfkey[0x10];
   unsigned char fb[0x10];
-  
-  fprintf(stderr, "samdump2 1.1.1 by Objectif Securite\nhttp://www.objectif-securite.ch\noriginal author: ncuomo@studenti.unina.it\n\n" );
-  
-  if( argc != 3 ) {
-    printf( "Usage:\nsamdump2 samhive keyfile\n" );
-    return -1;
-  }
-  
-  /* Open bootkey file */
-  if( ( f = fopen( argv[2], "rb" ) ) != NULL ) {
-    fread( &bootkey, 1, 16, f );
-    fclose( f );
-  }
-  else {
-    fprintf( stderr, "Error reading from %s\n", argv[2] );
-    return -1;
-  }
-  
+    
   /* Initialize registry access function */
   _InitHive( &h );
   
-  /* Open sam hive */
-  if( _RegOpenHive( argv[1], &h ) ) {
-    fprintf( stderr, "Error opening sam hive or not valid file(\"%s\")\n", argv[1] );
-    return -1;
-  }
-  
+  if (!live) {
+    /* Open sam hive */
+    if( _RegOpenHive(sam, &h ) ) {
+      sprintf( error, "Error opening sam hive or not valid file(\"%s\")\n", sam );
+      return -1;
+    }
+  } else {
+    if( _RegOpenHiveBuffer(sam, (unsigned long) size, &h ) ) {
+      sprintf( error, "Error opening sam hive, hive not valid\n");
+      return -1;
+    }
+  }    
+
   /* Get Root key name 
      SAM for 2k/XP,
      CMI-CreateHive{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx} for Vista */
   if( _RegGetRootKey( &h, &root_key)) {
-    fprintf( stderr, "Error reading hive root key\n");
+    sprintf( error, "Error reading hive root key\n");
     return -1;
   }
-  fprintf(stderr, "Root Key : %s\n", root_key);
+  if (debug)
+    printf("Root Key : %s\n", root_key);
 
   regaccountkey = (char *) malloc(strlen(root_key)+30);
   reguserskey = (char *) malloc(strlen(root_key)+30);
@@ -200,13 +262,13 @@ int main( int argc, char **argv ) {
   /* Open SAM\\SAM\\Domains\\Account key*/
   if( _RegOpenKey( &h, regaccountkey, &n ) ) {
     _RegCloseHive( &h );
-    fprintf( stderr, "%s key!\n", regaccountkey );
+    sprintf( error, "%s key!\n", regaccountkey );
     return -1;
   }
   
   if( _RegQueryValue( &h, "F", n, &b, &blen ) ) {       
     _RegCloseHive( &h );
-    fprintf( stderr, "No F!\n" );
+    sprintf( error, "No F!\n" );
     return -1;
   }
   
@@ -227,7 +289,7 @@ int main( int argc, char **argv ) {
     /* Open  SAM\\SAM\\Domains\\Account\\Users */
     if( _RegOpenKey( &h, reguserskey, &n ) ) {
       _RegCloseHive( &h );
-      fprintf( stderr, "No Users key!\n" );
+      sprintf( error, "No Users key!\n" );
       return -1;
     }
     
@@ -235,9 +297,8 @@ int main( int argc, char **argv ) {
     
     j = _RegEnumKey( &h, n, j, (char*)regkeyname, &regkeynamelen );
 
-#if DEBUG
+    if (debug)
     printf("******************** %d ********************\n", j);
-#endif
     
     /* Skip Names key */
     if( !memcmp( regkeyname, "Names", regkeynamelen ) )
@@ -249,18 +310,33 @@ int main( int argc, char **argv ) {
     strcpy( keyname, reguserskey );
     strcat( keyname, "\\" ) ;
     strcat( keyname, (char*)regkeyname ) ;
-    
+
+    if (debug)
+      printf("keyname = %s\n", keyname);
+
     if( _RegOpenKey( &h, keyname, &n ) ) {
       _RegCloseHive( &h );
       
-      fprintf( stderr, "Asd -_- _RegEnumKey fail!\n" );
+      sprintf( error, "Asd -_- _RegEnumKey fail!\n" );
       return -1;
     }
     
+    if( _RegQueryValue( &h, "F", n, &b, &blen ) ) {
+      _RegCloseHive( &h );
+      
+      sprintf( error, "No F value!\n" );
+      return -1;
+    }
+
+    disabled = (unsigned short) *(b+56) & 0x0001;
+    if (debug)
+      printf("disabled = %d\n", disabled);
+
+
     if( _RegQueryValue( &h, "V", n, &b, &blen ) ) {
       _RegCloseHive( &h );
       
-      fprintf( stderr, "No V value!\n" );
+      sprintf( error, "No V value!\n" );
       return -1;
     }
     
@@ -275,17 +351,14 @@ int main( int argc, char **argv ) {
     usernamelen = __bswap_32(*(int*)(b + 0x10) >> 1);
 #endif 
     usernameoffset = b[0xc] + 0xcc;
-#ifdef DEBUG 
-    printf("\nusername len=%d, off=%x\n", usernamelen, usernameoffset);
-#endif
-    
-    username = (char *) malloc(  usernamelen + 1 );
 
-    // Quick hack for unicode -> ascii translation
-    for( z = 0; z < usernamelen; z++)
-      username[z] = b[usernameoffset + z*2];
+    if (debug)
+      printf("\nusername len=%d, off=%x\n", usernamelen, usernameoffset);
     
-    username[ usernamelen ] = 0;
+    username_utf8 = (char *) malloc (usernamelen*2 + 1);
+    memset(username_utf8, 0, usernamelen*2 + 1);
+    utf16_to_utf8 ((unsigned char *)username_utf8, (unsigned short int*) &b[usernameoffset], usernamelen);
+
 #if BYTE_ORDER == LITTLE_ENDIAN
     lm_hashesoffset = *(int *)(b + 0x9c ) + 0xcc;
     lm_size = *(int *)(b + 0xa0 );
@@ -297,21 +370,26 @@ int main( int argc, char **argv ) {
     nt_hashesoffset = __bswap_32(*(int *)(b + 0xa8 )) + 0xcc;
     nt_size = __bswap_32(*(int *)(b + 0xac ));
 #endif
-#ifdef DEBUG 
-    printf("lm_hashoffset = %x, lm_size = %x\n", lm_hashesoffset, lm_size);
-    printf("nt_hashoffset = %x, nt_size = %x\n", nt_hashesoffset, nt_size);
-#endif
 
-      /* Print the user hash */
-      printf( "%s:%d:", username, rid );
-      
-    
+    if (debug) {
+      printf("lm_hashoffset = %x, lm_size = %x\n", lm_hashesoffset, lm_size);
+      printf("nt_hashoffset = %x, nt_size = %x\n", nt_hashesoffset, nt_size);
+    }
+
+    buff = (char*)malloc(512);
+    /* Print the user hash */
+    if (disabled)
+      buff_len = sprintf(buff, "*disabled* %s:%d:", username_utf8, rid );
+    else
+      buff_len = sprintf(buff, "%s:%d:", username_utf8, rid );
+
+
     if( lm_size == 0x14 ) {
-#ifdef DEBUG
-      printf("\n");
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", b[lm_hashesoffset+4+i] );
-#endif
+      if (debug) {
+	printf("\n");
+	for( i = 0; i < 0x10; i++ )
+	  printf( "%.2x", b[lm_hashesoffset+4+i] );
+      }
 
       /* LANMAN */
       /* hash the hbootkey and decode lanman password hashes */
@@ -329,12 +407,13 @@ int main( int argc, char **argv ) {
       
       RC4_set_key( &rc4k, 0x10, md5hash );
       RC4( &rc4k, 0x10, &b[ lm_hashesoffset + 4 ], obfkey );
-#ifdef DEBUG
-      printf("\nobfkey: ");
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", (unsigned char)obfkey[i] );
-      printf("\n");
-#endif
+      if (debug) {
+	printf("\nobfkey: ");
+	for( i = 0; i < 0x10; i++ )
+	  printf( "%.2x", (unsigned char)obfkey[i] );
+	printf("\n");
+      }
+
       
       /* From Pwdump */
       
@@ -354,20 +433,24 @@ int main( int argc, char **argv ) {
       
       // sf25( obfkey, (int*)&rid, fb );
       
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", fb[i] );
+      for( i = 0; i < 0x10; i++ ) {
+	sprintf(buff+buff_len, "%.2x", fb[i] );
+	buff_len +=2;
+      }
     } else {
-      printf( "aad3b435b51404eeaad3b435b51404ee" );
+      sprintf(buff+buff_len, "aad3b435b51404eeaad3b435b51404ee" );
+      buff_len+=32;
     }
-    printf( ":" );
+    sprintf(buff+buff_len, ":" );
+    buff_len++;
     
     if( nt_size == 0x14 ) {
-#ifdef DEBUG
-      printf("\n");
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", b[nt_hashesoffset+4+i] );
-      printf("\n");
-#endif
+      if (debug) {
+	printf("\n");
+	for( i = 0; i < 0x10; i++ )
+	  printf( "%.2x", b[nt_hashesoffset+4+i] );
+	printf("\n");
+      }
       
       /* NT */
       /* hash the hbootkey and decode the nt password hashes */
@@ -403,15 +486,21 @@ int main( int argc, char **argv ) {
       /* sf27 wrap to sf25 */
       //sf27( obfkey, (int*)&rid, fb );
       
-      for( i = 0; i < 0x10; i++ )
-	printf( "%.2x", fb[i] );
-      
+      for( i = 0; i < 0x10; i++ ) {
+	sprintf(buff+buff_len, "%.2x", fb[i] );
+	buff_len +=2;
+      }
     } else {
-      printf("31d6cfe0d16ae931b73c59d7e0c089c0");
+      sprintf(buff+buff_len, "31d6cfe0d16ae931b73c59d7e0c089c0");
+      buff_len+=32;
     }
-    printf( ":::\n" );
+    sprintf(buff+buff_len, ":::" );
+    buff_len+=3;
+
+    /* add the hash to the list */
+    list_add_tail(list, buff);
     
-    free( username );
+    free( username_utf8 );
     free( keyname );
   }
   

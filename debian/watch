@@ -1,2 +1,2 @@
 version=3
-http://sf.net/ophcrack/samdump2-(.+)\.tar\.gz
+http://sf.net/ophcrack/samdump2-(.+)\.tar\.(?:xz|gz|bz2)

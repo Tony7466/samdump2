@@ -1,3 +1,22 @@
+2012-04-20 Cedric Tissieres <cedric.tissieres@objectif-securite.ch>
+	* Version 3.0
+	* Dump of hashes on live systems running on NTFS fs
+	  through low-level fs access (admin rights required)
+	* Support of special characters in usernames
+	
+2008-10-02 Cedric Tissieres <cedric.tissieres@objectif-securite.ch>
+	* Fix segfault when no output file given (thanks to pcguy11)
+	* Minor changes to match the code in ophcrack branch
+
+2008-03-17 Cedric Tissieres <cedric.tissieres@objectif-securite.ch>
+	* Version 2.0
+	* Merge bkhive code into samdump2 in order to have all
+	  functionality in one tool
+	* Make bkhive and samdump2 easier to call from an external program
+	* Fix headers for endianness (thanks to an anonymous poster)
+	* Changes to Makefile
+	* Changes to man page.
+	
 2007-11-21 Cedric Tissieres <cedric.tissieres@objectif-securite.ch>
 	* Version 1.1.1
 	* Fix the detection of LM hash

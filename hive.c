@@ -39,7 +39,6 @@
 #endif
 
 
-
 nk_hdr* read_nk(nk_hdr *nk, struct hive *h, int offset ) {
   memcpy(nk, h->base+offset+4, sizeof(nk_hdr));
   nk->key_name = (h->base+offset+4+76);
@@ -86,10 +85,10 @@ vk_hdr* read_vk(vk_hdr *vk, struct hive *h, int offset ) {
 }
 
 int* read_valuelist(int *value, struct hive *h, int offset, int size ){
-  int i =0;
   memcpy(value, h->base+offset+4, size*sizeof(int));
 #if BYTE_ORDER == LITTLE_ENDIAN
 #elif BYTE_ORDER == BIG_ENDIAN
+  int i;
   for (i=0; i<size; i++)
     value[i] = __bswap_32(value[i]);
 #endif
@@ -123,12 +122,12 @@ void _InitHive( struct hive *h ) {
   return;
 }
 
-int _RegOpenHive( char *filename, struct hive *h ) {
+int _RegOpenHive( unsigned char *filename, struct hive *h ) {
   FILE *hiveh;
   unsigned long hsize;
   
   /* Prova ad aprire l'hive */
-  if( ( hiveh = fopen( filename, "rb" ) ) != NULL ) {
+  if( ( hiveh = fopen((char *) filename, "rb" ) ) != NULL ) {
     if( fseek( hiveh, 0, SEEK_END ) == 0 ) {
       hsize = ftell( hiveh );
       
@@ -154,6 +153,20 @@ int _RegOpenHive( char *filename, struct hive *h ) {
     }
     fclose( hiveh );
   }
+  return -1;
+}
+
+int _RegOpenHiveBuffer( unsigned char *buffer, unsigned long size, struct hive *h ) {
+  
+  h->base = (unsigned char *) malloc( size );
+  memcpy(h->base, buffer, size);
+#if BYTE_ORDER == LITTLE_ENDIAN
+  if( *((int*)h->base) == 0x66676572 )
+    return 0;
+#elif BYTE_ORDER == BIG_ENDIAN
+  if( *((int*)h->base) == __bswap_32( 0x66676572)) 
+    return 0;
+#endif
   return -1;
 }
 
@@ -204,7 +217,7 @@ int _RegGetRootKey(struct hive *h, char **root_key) {
    
    if ( n->id == NK_ID && n->type == NK_ROOT ) {
      *root_key = (char *)malloc(n->name_len+1);
-     strncpy(*root_key, n->key_name, n->name_len);
+     strncpy(*root_key, (char*)n->key_name, n->name_len);
      (*root_key)[n->name_len] = 0;
      free(n);
      return 0;
@@ -258,8 +271,11 @@ int _RegOpenKey( struct hive *h, char *path, nk_hdr **nr ) {
 
 int _RegQueryValue( struct hive *h, char *name, nk_hdr *nr, unsigned char **buff, int *len ) {
   vk_hdr *v;
-  unsigned int i,j;
+  unsigned int i;
   int *l;
+#ifdef DEBUG
+  int j;
+#endif
   
   v = (vk_hdr*) malloc(sizeof(vk_hdr));
   l = (int*) malloc(sizeof(int)*nr->value_cnt);
@@ -305,7 +321,7 @@ int _RegEnumKey( struct hive *h, nk_hdr *nr, int index, char *name, int *namelen
   lf = (lf_hdr*) malloc(sizeof(lf_hdr));
   nk = (nk_hdr*) malloc(sizeof(nk_hdr));
   hr = (hashrecord*) malloc(sizeof(hashrecord));
-#if DEBUG
+#ifdef DEBUG
   printf("subkey_num = %d\n", nr->subkey_num);
 #endif
 

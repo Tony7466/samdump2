@@ -3,50 +3,13 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-CFLAGS = -Wall -g
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
+export PREFIX=/usr
 
-build: build-stamp
-build-stamp:
-	dh_testdir
-	$(MAKE) CFLAGS="$(CFLAGS)"
-	touch $@
+%:
+	dh $@
 
-clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp
-	$(MAKE) clean
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs
-	$(MAKE) install PREFIX=/usr DESTDIR=$(CURDIR)/debian/samdump2
-
-binary-indep: build install
-binary-arch: build install
-	dh_testdir
-	dh_testroot
+override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog
-	dh_installdocs
-	rm -rf $(CURDIR)/debian/samdump2/usr/share/man
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
 
-binary: binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
+override_dh_auto_install:
+	dh_auto_install --destdir debian/samdump2/

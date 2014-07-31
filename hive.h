@@ -27,16 +27,19 @@
 #ifndef HIVE_H
 #define HIVE_H
 
-#ifdef WIN32
-#define BYTE_ORDER LITTLE_ENDIAN
-#endif 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
+
+#define NK_ID	0x6B6E
+#define NK_ROOT 0x2c
+#define LF_ID	0x666C
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 struct hive
 {
@@ -91,11 +94,6 @@ typedef struct _vk_hdr
   unsigned char *value_name;
 } vk_hdr;
 
-#define NK_ID	0x6B6E
-#define NK_ROOT 0x2c
-
-#define LF_ID	0x666C
-
 nk_hdr* read_nk(nk_hdr *nk, struct hive *h, int offset ); 
 lf_hdr* read_lf(lf_hdr *lf, struct hive *h, int offset );
 vk_hdr* read_vk(vk_hdr *vk, struct hive *h, int offset );
@@ -103,12 +101,13 @@ hashrecord* read_hr(hashrecord *hr, unsigned char *pos, int index );
 int* read_valuelist(int *value, struct hive *h, int offset, int size);
 unsigned char* read_data(struct hive *h, int offset );
 
-
 void _RegCloseHive( struct hive *h );
 
 void _InitHive( struct hive *h );
 
-int _RegOpenHive( char *filename, struct hive *h );
+int _RegOpenHive( unsigned char *filename, struct hive *h );
+
+int _RegOpenHiveBuffer( unsigned char *buffer, unsigned long size, struct hive *h );
 
 long parself( struct hive *h, char *t, unsigned long off );
 
@@ -120,4 +119,7 @@ int _RegQueryValue( struct hive *h, char *name, nk_hdr *nr, unsigned char **buff
 
 int _RegEnumKey( struct hive *h, nk_hdr *nr, int index, char *name, int *namelen );
 
+#ifdef __cplusplus
+}
+#endif
 #endif
