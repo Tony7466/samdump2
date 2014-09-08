@@ -1,3 +1,10 @@
+samdump2 (3.0.0-2) unstable; urgency=medium
+
+  * QA upload.
+  * Fix breaks/replaces for bkhive.  Closes: #760723
+
+ -- Unit 193 <unit193@ubuntu.com>  Mon, 08 Sep 2014 17:30:56 -0400
+
 samdump2 (3.0.0-1) unstable; urgency=medium
 
   * QA upload.

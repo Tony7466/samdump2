@@ -9,8 +9,8 @@ Homepage: http://ophcrack.sourceforge.net/
 Package: samdump2
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Replaces: bkhive
-Breaks: bkhive
+Replaces: bkhive (<< 3.0.0)
+Breaks: bkhive (<< 3.0.0)
 Suggests: ophcrack
 Description: Dump Windows 2k/NT/XP password hashes
  This tool is designed to dump Windows 2k/NT/XP password hashes from a SAM
