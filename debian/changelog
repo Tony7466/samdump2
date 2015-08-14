@@ -1,3 +1,19 @@
+samdump2 (3.0.0-3) unstable; urgency=medium
+
+  * QA upload.
+  * debian/control: Bumped the Standard-Version to 3.9.6.
+  * debian/copyright:
+      - Added email of Cedric Tissieres.
+      - Added email of Bertrand Mesot.
+      - Fixed FIles: and Copyright: fields of list.* files.
+      - Added Ansgar Burchardt to debian/* copyright.
+      - Fixed Adam Cécile years copyright.
+  * debian/rules:
+      - Removed some extra comments.
+      - Added DEB_BUILD_MAINT_OPTIONS for hardening.
+
+ -- Paulo Roberto Alves de Oliveira (aka kretcheu) <kretcheu@gmail.com>  Thu, 13 Aug 2015 21:13:00 -0300
+
 samdump2 (3.0.0-2) unstable; urgency=medium
 
   * QA upload.
