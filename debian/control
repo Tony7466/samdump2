@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Debian QA Group <packages@qa.debian.org>
 Build-Depends: debhelper (>= 9), libssl-dev
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 Homepage: http://ophcrack.sourceforge.net/
 
 Package: samdump2

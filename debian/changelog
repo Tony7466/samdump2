@@ -1,3 +1,11 @@
+samdump2 (3.0.0-4) unstable; urgency=medium
+
+  * QA upload.
+  * Fix FTBFS with openssl 1.1.0. Thanks to Adrian Bunk. (Closes: #828537)
+  * Bump Standards-Version to 3.9.8.
+
+ -- Chris Lamb <lamby@debian.org>  Sat, 12 Nov 2016 13:57:35 +0000
+
 samdump2 (3.0.0-3) unstable; urgency=medium
 
   * QA upload.
