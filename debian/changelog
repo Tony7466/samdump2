@@ -1,9 +1,9 @@
-samdump2 (3.0.0-6) UNRELEASED; urgency=medium
+samdump2 (3.0.0-6) unstable; urgency=medium
 
   * Adopt package under the pkg-security team's umbrella. Closes: #673963
   * Add Vcs-Git and Vcs-Browser fields.
 
- -- Raphaël Hertzog <hertzog@debian.org>  Tue, 22 Nov 2016 17:07:46 +0100
+ -- Raphaël Hertzog <hertzog@debian.org>  Tue, 22 Nov 2016 17:13:20 +0100
 
 samdump2 (3.0.0-5) unstable; urgency=medium
 
