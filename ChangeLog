@@ -1,0 +1,32 @@
+2007-02-16 Cedric Tissieres <cedric.tissieres@objectif-securite.ch>
+	* Code is (should be) portable
+	* Link againt OpenSSL instead of libdes
+	* Fix bugs
+	* Add support for Windows Vista
+	* Code cleaning + debugging 
+	* Fix wrong permissions in files
+	* Fix Makefile
+	* Changes to LICENSE
+	
+2006-10-15 Adam Cécile (Le_Vert) <gandalf@le-vert.net>
+	* Fix wrong permissions in Makefile (777 instead of 755).
+
+2006-10-14 Adam Cécile (Le_Vert) <gandalf@le-vert.net>
+	* Bump to version 1.0.0 !
+	* Update to libdes 4.04b.
+	* Re-write Makefile.
+	* Write a man page.
+	* Move gpl.txt to COPYING.
+	* Add a ChangeLog.
+	* Add a README file containing "syskey.txt"
+	  This document describe the obfuscation algorithm used by Windows
+	  2k/NT/XP Syskey and the steps required to remove its encryption from
+	  the password hashes
+	* Add Nicola Cuomo copyright in sources files headers.
+	* Write LICENSE file that summarize different copyright and licenses
+	  used in this software.
+	* Add an exception to the GPL license to fit with the OpenSSL-like
+	  licenses used by Eric Young.
+
+2006-10-13 Nicola Cuomo <ncuomo@studenti.unina.it>
+	* Switch to GNU General Public License version 2.
