@@ -25,6 +25,7 @@ Description: Dump Windows 2k/NT/XP password hashes
  Syskey is a Windows feature that adds an additional encryption layer to the
  password hashes stored in the SAM database.
 
+# Can be dropped during the buster cycle
 Package: bkhive
 Section: oldlibs
 Priority: extra
