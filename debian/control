@@ -1,7 +1,8 @@
 Source: samdump2
 Section: admin
 Priority: optional
-Maintainer: Debian QA Group <packages@qa.debian.org>
+Maintainer: Debian Security Tools Packaging Team <pkg-security-team@lists.alioth.debian.org>
+Uploaders: Raphaël Hertzog <hertzog@debian.org>
 Build-Depends: debhelper (>= 10), libssl-dev
 Standards-Version: 3.9.8
 Homepage: http://ophcrack.sourceforge.net/
