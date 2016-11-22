@@ -1,4 +1,10 @@
+2007-11-21 Cedric Tissieres <cedric.tissieres@objectif-securite.ch>
+	* Version 1.1.1
+	* Fix the detection of LM hash
+	  We get LM and NT hashes offset and size directly
+	
 2007-02-16 Cedric Tissieres <cedric.tissieres@objectif-securite.ch>
+	* Version 1.1.0
 	* Code is (should be) portable
 	* Link againt OpenSSL instead of libdes
 	* Fix bugs
