@@ -5,6 +5,8 @@ Description: Change the formatting in the manpage to make it more readable.
 Author: Unit 193 <unit193@ubuntu.com>
 Last-Update: 2014-06-04
 
+Index: samdump2-3.0.0/samdump2.1
+===================================================================
 --- samdump2-3.0.0.orig/samdump2.1
 +++ samdump2-3.0.0/samdump2.1
 @@ -1,11 +1,14 @@

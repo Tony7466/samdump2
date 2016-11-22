@@ -4,9 +4,11 @@ Origin: vendor
 Forwarded: no
 Last-Update: 2014-01-04
 
+Index: samdump2-3.0.0/Makefile
+===================================================================
 --- samdump2-3.0.0.orig/Makefile
 +++ samdump2-3.0.0/Makefile
-@@ -24,12 +24,12 @@
+@@ -24,12 +24,12 @@ DISTFILES = AUTHORS ChangeLog hive.c LIC
  	samdump2.1 samdump2.h bkhive.c COPYING hive.h list.c\
  	main.c README samdump2.c dumpsam.c ntdll.h
  DESTDIR   = 
@@ -22,7 +24,7 @@ Last-Update: 2014-01-04
  LIBS      = -lcrypto
  
  # Default target
-@@ -39,7 +39,7 @@
+@@ -39,7 +39,7 @@ build: samdump2
  
  samdump2: hive.o list.o bkhive.o samdump2.o main.o dumpsam.o
  	@echo "Building binary..."
@@ -31,4 +33,3 @@ Last-Update: 2014-01-04
  	@echo ""
  
  # Clean target
-

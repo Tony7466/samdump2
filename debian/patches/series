@@ -1,5 +1,5 @@
-ftbfs_link.patch
-compiler_flags.patch
-install_infos.patch
-manpage_formatting.patch
-openssl.patch
+10_ftbfs_link.patch
+20_compiler_flags.patch
+30_install_infos.patch
+40_manpage_formatting.patch
+50_openssl.patch

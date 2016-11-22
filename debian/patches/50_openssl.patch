@@ -1,3 +1,8 @@
+Description: fix a FTBFS with OpenSSL 1.1.0. (Closes: #828537)
+Author: Joao Eriberto Mota Filho <eriberto@debian.org>
+Last-Update: 2016-11-22
+Index: samdump2-3.0.0/samdump2.c
+===================================================================
 --- samdump2-3.0.0.orig/samdump2.c
 +++ samdump2-3.0.0/samdump2.c
 @@ -72,7 +72,7 @@ void str_to_key(unsigned char *str,unsig

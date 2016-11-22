@@ -1,3 +1,15 @@
+samdump2 (3.0.0-5) unstable; urgency=medium
+
+  * QA upload.
+  * Bumped DH level to 10.
+  * debian/copyright: updated the packaging copyright data.
+  * debian/patches/:
+      - Renamed all patches to organize the folder.
+      - Added a header to openssl.patch (now 50_openssl.patch).
+  * debian/watch: bumped to version 4.
+
+ -- Joao Eriberto Mota Filho <eriberto@debian.org>  Tue, 22 Nov 2016 12:29:08 -0200
+
 samdump2 (3.0.0-4) unstable; urgency=medium
 
   * QA upload.
@@ -13,7 +25,7 @@ samdump2 (3.0.0-3) unstable; urgency=medium
   * debian/copyright:
       - Added email of Cedric Tissieres.
       - Added email of Bertrand Mesot.
-      - Fixed FIles: and Copyright: fields of list.* files.
+      - Fixed Files: and Copyright: fields of list.* files.
       - Added Ansgar Burchardt to debian/* copyright.
       - Fixed Adam Cécile years copyright.
   * debian/rules:
