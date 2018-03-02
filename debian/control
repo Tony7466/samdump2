@@ -1,7 +1,7 @@
 Source: samdump2
 Section: admin
 Priority: optional
-Maintainer: Debian Security Tools Packaging Team <pkg-security-team@lists.alioth.debian.org>
+Maintainer: Debian Security Tools <team+pkg-security@tracker.debian.org>
 Uploaders: Raphaël Hertzog <hertzog@debian.org>
 Build-Depends: debhelper (>= 10), libssl-dev
 Standards-Version: 3.9.8
