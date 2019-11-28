@@ -1,3 +1,23 @@
+samdump2 (3.0.0-7) unstable; urgency=medium
+
+  [ Raphaël Hertzog ]
+  * Update team maintainer address to Debian Security Tools
+    <team+pkg-security@tracker.debian.org>
+  * Update Vcs-Git and Vcs-Browser for the move to salsa.debian.org
+  * Drop bkhive transitional package (Closes: #878861)
+  * Bump Standards-Version to 4.4.1
+  * Switch to debhelper compat level 12
+
+  [ Samuel Henrique ]
+  * Add salsa-ci.yml
+
+  [ Debian Janitor ]
+  * Use secure copyright file specification URI.
+  * Use secure URI in debian/watch.
+  * Set upstream metadata fields: Archive.
+
+ -- Raphaël Hertzog <hertzog@debian.org>  Thu, 28 Nov 2019 17:54:35 +0100
+
 samdump2 (3.0.0-6) unstable; urgency=medium
 
   * Adopt package under the pkg-security team's umbrella. Closes: #673963
