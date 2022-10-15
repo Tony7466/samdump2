@@ -12,8 +12,6 @@ Vcs-Browser: https://salsa.debian.org/pkg-security-team/samdump2
 Package: samdump2
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Replaces: bkhive (<< 3.0.0)
-Breaks: bkhive (<< 3.0.0)
 Suggests: ophcrack
 Description: Dump Windows 2k/NT/XP password hashes
  This tool is designed to dump Windows 2k/NT/XP password hashes from a SAM
